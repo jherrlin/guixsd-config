@@ -9,19 +9,31 @@
  (gnu)
  (gnu system nss)
  (gnu system locale)
+ (gnu packages gnome)
+ (gnu packages gnuzilla) 
+ (gnu packages suckless) 
+ (gnu packages admin)  
+ (gnu packages fonts)
+ (gnu packages xorg)  
  (gnu packages emacs)
  (gnu packages xdisorg)
  (gnu packages guile)
+ (gnu packages display-managers)
+ (gnu packages video) 
  (gnu packages networking)
+ (gnu packages version-control)
  (gnu packages ntp)
  (gnu packages libusb)
  (gnu services)
+ (gnu services dbus) 
  (gnu services networking)
  (gnu services xorg)
  (gnu services web)
- (gnu services desktop)
- )
+ (gnu services desktop))
 
+
+(use-service-modules xorg dbus networking desktop)
+(use-package-modules xorg bootloaders wm ratpoison certs suckless emacs)
 
 (define xkeyboard-config "
 Section \"InputClass\"
@@ -37,12 +49,20 @@ Section \"InputClass\"
 EndSection
 ")
 
-
-(use-service-modules dbus networking desktop)
-(use-package-modules bootloaders wm ratpoison certs suckless emacs)
+(define libinput.conf "
+# Use the libinput driver for all event devices
+Section \"InputClass\"
+	Identifier \"libinput keyboard catchall\"
+	MatchIsKeyboard \"on\"
+	MatchDevicePath \"/dev/input/event*\"
+	Driver \"libinput\"
+	Option \"XkbLayout\" \"us,se\"
+	Option \"XkbOptions\" \"grp:win_space_toggle,caps:ctrl_modifier\"
+EndSection
+")
 
 (operating-system
-  (host-name "antelope")
+  (host-name "gnu")
   (timezone "Europe/Stockholm")
   (locale "en_US.utf8")
   (locale-definitions
@@ -73,8 +93,8 @@ EndSection
 			 (needed-for-boot? #t)
 			 (type "vfat"))
 		       %base-file-systems))
-  (swap-devices '("/dev/sda2"))
 
+  ;;(swap-devices '("/dev/sda2"))
   (kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
 
   (users (cons (user-account
@@ -90,10 +110,25 @@ EndSection
   ;; the log-in screen with F1.
   (packages (cons* ratpoison i3-wm i3status dmenu ;window managers
 		   nss-certs                      ;for HTTPS access
+		   font-dejavu
+		   font-hack
+		   font-inconsolata
+		   font-liberation
+		   font-terminus
+		   font-ubuntu		   
 		   emacs
+		   icecat
+		   xset
+		   xinit
+		   ;; bash-completion
+		   magit
 		   emacs-guix
+		   htop
+		   xf86-input-evdev
+		   xf86-video-fbdev
+		   xorg-server		   
 		   rxvt-unicode
-		   ;; git
+		   git
 		   %base-packages))
 
   (services
@@ -102,14 +137,20 @@ EndSection
     (slim-service
      #:allow-empty-passwords? #f #:auto-login? #f
      #:startx (xorg-start-command
-	       #:configuration-file
-	       (xorg-configuration-file
-		#:extra-config (list xkeyboard-config))))
+               #:configuration-file
+               (xorg-configuration-file
+                #:extra-config (list libinput.conf))))
+    ;; (slim-service
+    ;;  #:allow-empty-passwords? #f #:auto-login? #f
+    ;;  #:startx (xorg-start-command
+    ;; 	       #:configuration-file
+    ;; 	       (xorg-configuration-file
+    ;; 		#:extra-config (list xkeyboard-config))))
     ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm?id=v0.13.0-2323-g35131babc#n799
     ;;
     ;; Screen lockers are a pretty useful thing and these are small.
-    (screen-locker-service slock)
-    (screen-locker-service xlockmore "xlock")
+    ;; (screen-locker-service slock)
+    ;; (screen-locker-service xlockmore "xlock")
 
     ;; Add udev rules for MTP devices so that non-root users can access
     ;; them.

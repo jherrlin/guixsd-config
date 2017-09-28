@@ -10,22 +10,22 @@
  (gnu system nss)
  (gnu system locale)
  (gnu packages gnome)
- (gnu packages gnuzilla) 
- (gnu packages suckless) 
- (gnu packages admin)  
+ (gnu packages gnuzilla)
+ (gnu packages suckless)
+ (gnu packages admin)
  (gnu packages fonts)
- (gnu packages xorg)  
+ (gnu packages xorg)
  (gnu packages emacs)
  (gnu packages xdisorg)
  (gnu packages guile)
  (gnu packages display-managers)
- (gnu packages video) 
+ (gnu packages video)
  (gnu packages networking)
  (gnu packages version-control)
  (gnu packages ntp)
  (gnu packages libusb)
  (gnu services)
- (gnu services dbus) 
+ (gnu services dbus)
  (gnu services networking)
  (gnu services xorg)
  (gnu services web)
@@ -35,6 +35,7 @@
 (use-service-modules xorg dbus networking desktop)
 (use-package-modules xorg bootloaders wm ratpoison certs suckless emacs)
 
+;; None of this ones are working
 (define xkeyboard-config "
 Section \"InputClass\"
      Identifier \"keyboard-all\" \"system-keyboard\"
@@ -49,6 +50,7 @@ Section \"InputClass\"
 EndSection
 ")
 
+;; None of this ones are working
 (define libinput.conf "
 # Use the libinput driver for all event devices
 Section \"InputClass\"
@@ -115,18 +117,16 @@ EndSection
 		   font-inconsolata
 		   font-liberation
 		   font-terminus
-		   font-ubuntu		   
+		   font-ubuntu
 		   emacs
 		   icecat
 		   xset
 		   xinit
 		   ;; bash-completion
-		   magit
-		   emacs-guix
 		   htop
 		   xf86-input-evdev
 		   xf86-video-fbdev
-		   xorg-server		   
+		   xorg-server
 		   rxvt-unicode
 		   git
 		   %base-packages))

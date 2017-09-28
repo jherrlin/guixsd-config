@@ -35,22 +35,6 @@
 (use-service-modules xorg dbus networking desktop)
 (use-package-modules xorg bootloaders wm ratpoison certs suckless emacs)
 
-;; None of this ones are working
-(define xkeyboard-config "
-Section \"InputClass\"
-     Identifier \"keyboard-all\" \"system-keyboard\"
-     MatchIsKeyboard \"on\"
-     MatchDevicePath \"/dev/input/event*\"
-     Driver \"evdev\"
-     Option \"XkbModel\" \"pc105\"
-     Option \"XkbLayout\" \"us,se\"
-     Option \"XkbVariant\" \",\"
-     Option \"XkbOptions\" \"grp:win_space_toggle,caps:ctrl_modifier\"
-     MatchIsKeyboard \"on\"
-EndSection
-")
-
-;; None of this ones are working
 (define libinput.conf "
 # Use the libinput driver for all event devices
 Section \"InputClass\"
@@ -72,14 +56,10 @@ EndSection
     (locale-definition (name "en_US.utf8") (source "en_US") (charset "UTF-8"))
     (locale-definition (name "sv_SE.utf8") (source "sv_SE") (charset "UTF-8"))))
 
-  ;; Assuming /dev/sdX is the target hard disk, and "my-root"
-  ;; is the label of the target root file system.
-  ;;
   ;; Device       Start       End   Sectors   Size Type
   ;; /dev/sda1     2048   1026047   1024000   500M EFI System
   ;; /dev/sda2  1026048   9414655   8388608     4G Linux swap
   ;; /dev/sda3  9414656 234441614 225026959 107.3G Linux filesystem
-  ;;
   (bootloader (bootloader-configuration
 	       (bootloader grub-efi-bootloader)
 	       (target "/boot/efi")))
@@ -96,7 +76,7 @@ EndSection
 			 (type "vfat"))
 		       %base-file-systems))
 
-  ;;(swap-devices '("/dev/sda2"))
+  ;; (swap-devices '("/dev/sda2"))
   (kernel-arguments '("modprobe.blacklist=pcspkr,snd_pcsp"))
 
   (users (cons (user-account
@@ -140,20 +120,7 @@ EndSection
                #:configuration-file
                (xorg-configuration-file
                 #:extra-config (list libinput.conf))))
-    ;; (slim-service
-    ;;  #:allow-empty-passwords? #f #:auto-login? #f
-    ;;  #:startx (xorg-start-command
-    ;; 	       #:configuration-file
-    ;; 	       (xorg-configuration-file
-    ;; 		#:extra-config (list xkeyboard-config))))
-    ;; https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/services/desktop.scm?id=v0.13.0-2323-g35131babc#n799
-    ;;
-    ;; Screen lockers are a pretty useful thing and these are small.
-    ;; (screen-locker-service slock)
-    ;; (screen-locker-service xlockmore "xlock")
 
-    ;; Add udev rules for MTP devices so that non-root users can access
-    ;; them.
     (simple-service 'mtp udev-service-type (list libmtp))
 
     ;; The D-Bus clique.
@@ -166,8 +133,9 @@ EndSection
     (elogind-service)
     (dbus-service)
 
-    ;; https://www.gnu.org/software/guix/manual/guix.html#Networking-Services
-    (dhcp-client-service)
+    (service wpa-supplicant-service-type wpa-supplicant)
+    (service network-manager-service-type
+	     (network-manager-configuration))
     (ntp-service #:allow-large-adjustment? #t)
 
     %base-services))
